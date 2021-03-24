@@ -3,6 +3,8 @@ https://socialmediamvc.azurewebsites.net/
 
 This is my attempt at a simple discussion board similar to Reddit with some inspiration taken from Indeed.
 
+It uses ASP.NET Core MVC and Entity Framework Core for the backend and Bootstrap for the frontend.
+
 ## Usage
 Click "Register" in the top-right corner to create an account. From there you're free to:
 - Create new posts (click the "+" button next to the search bar)
