@@ -1,0 +1,280 @@
+﻿@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@model Entry
+@{
+    ApplicationUser user = null;
+    string action = ViewContext.RouteData.Values["Action"].ToString();
+    int routeId = -1;
+    if (ViewContext.RouteData.Values["id"] != null)
+    {
+        routeId = Int32.Parse(ViewContext.RouteData.Values["id"].ToString());
+    }
+    bool signedIn = false;
+    if (SignInManager.IsSignedIn(User))
+    {
+        signedIn = true;
+        user = await UserManager.GetUserAsync(User);
+    }
+}
+
+<!-- Entry buttons -->
+<div class="d-flex justify-content-between pt-2 mt-2 border-top border-secondary">
+    <div>
+        @if (action == "Details" || action == "DetailsPartial")
+        {
+            <button type="button" class="btn btn-primary btn-sm"
+                    data-bs-toggle="collapse" data-bs-target="#replyCollapse_@Model.Id"
+                    aria-expanded="false" aria-controls="replyCollapse_@Model.Id">
+                <i class="fas fa-comment-alt me-1"></i> Reply
+            </button>
+        }
+        else
+        {
+            if (action == "Hidden")
+            {
+                <a asp-controller="Entries" asp-action="Details" asp-route-id="@Model.Id" asp-route-showHidden="true"
+                   class="btn btn-primary btn-sm" role="button">
+                    <i class="fas fa-comment-alt me-1"></i> @Model.Replies.Count
+                    @if (Model.Replies.Count == 1)
+                    {
+                        <span>Reply</span>
+                    }
+                    else
+                    {
+                        <span>Replies</span>
+                    }
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Entries" asp-action="Details" asp-route-id="@Model.Id" asp-route-showHidden="false"
+                   class="btn btn-primary btn-sm" role="button">
+                    <i class="fas fa-comment-alt me-1"></i> @Model.Replies.Count
+                    @if (Model.Replies.Count == 1)
+                    {
+                        <span>Reply</span>
+                    }
+                    else
+                    {
+                        <span>Replies</span>
+                    }
+                </a>
+            }
+        }
+
+        @if (action == "DetailsPartial")
+        {
+            <button type="button" class="btn btn-primary btn-sm"
+                    data-bs-toggle="collapse" data-bs-target="#shareCollapsePartial_@Model.Id"
+                    aria-expanded="false" aria-controls="shareCollapsePartial_@Model.Id">
+                <i class="fas fa-share me-1"></i> Share
+            </button>
+        }
+        else
+        {
+            <button type="button" class="btn btn-primary btn-sm"
+                    data-bs-toggle="collapse" data-bs-target="#shareCollapse_@Model.Id"
+                    aria-expanded="false" aria-controls="shareCollapse_@Model.Id">
+                <i class="fas fa-share me-1"></i> Share
+            </button>
+        }
+
+        @if (signedIn && Model.SavedBy.Contains(user))
+        {
+            // Show unsave button
+            <button type="button" class="d-none saveBtn_@Model.Id btn btn-primary btn-sm"
+                    data-id="@Model.Id" data-url="@Url.Action("Save", "Users")"
+                    onclick="save(this)">
+                <i class="fas fa-bookmark me-1"></i> Save
+            </button>
+            <button type="button" class="unsaveBtn_@Model.Id btn btn-danger btn-sm"
+                    data-id="@Model.Id" data-url="@Url.Action("Unsave", "Users")"
+                    onclick="unsave(this)">
+                <i class="far fa-bookmark me-1"></i> Unsave
+            </button>
+        }
+        else
+        {
+            // Show save button
+            <button type="button" class="saveBtn_@Model.Id btn btn-primary btn-sm"
+                    data-id="@Model.Id" data-url="@Url.Action("Save", "Users")"
+                    onclick="save(this)">
+                <i class="fas fa-bookmark me-1"></i> Save
+            </button>
+            <button type="button" class="d-none unsaveBtn_@Model.Id btn btn-danger btn-sm"
+                    data-id="@Model.Id" data-url="@Url.Action("Unsave", "Users")"
+                    onclick="unsave(this)">
+                <i class="far fa-bookmark me-1"></i> Unsave
+            </button>
+        }
+
+        @if (signedIn && Model.HiddenBy.Contains(user))
+        {
+            // If controller passes a hidden entry, it's on Hidden page; allow re-hide
+            <button type="button" class="d-none hideBtn_@Model.Id btn btn-primary btn-sm"
+                    data-id="@Model.Id" data-url="@Url.Action("Hide", "Users")"
+                    onclick="hide(this)">
+                <i class="far fa-eye-slash me-1"></i> Hide
+            </button>
+            <button type="button" class="unhideBtn_@Model.Id btn btn-danger btn-sm"
+                    data-id="@Model.Id" data-url="@Url.Action("Unhide", "Users")"
+                    onclick="unhide(this)">
+                <i class="far fa-eye me-1"></i> Unhide
+            </button>
+        }
+        else
+        {
+            // Otherwise hide and collapse
+            <button type="button" class="btn btn-primary btn-sm"
+                    data-id="@Model.Id" data-url="@Url.Action("Hide", "Users")"
+                    onclick="hideAndCollapse(this)">
+                <i class="far fa-eye-slash me-1"></i> Hide
+            </button>
+        }
+    </div>
+    <div>
+        @if (signedIn && (Model.Author == user || User.IsInRole("admin")))
+        {
+            if (action == "Details" || action == "DetailsPartial")
+            {
+                <button role="button" class="btn btn-outline-warning btn-sm" onclick="edit(this)"
+                        data-id="@Model.Id">
+                    <i class="fas fa-edit me-1"></i> Edit
+                </button>
+            }
+            <button type="button" class="btn btn-outline-danger btn-sm"
+                    data-bs-toggle="modal" data-bs-target="#delete_@Model.Id">
+                <i class="fas fa-trash me-1"></i> Delete
+            </button>
+        }
+    </div>
+</div>
+<!-- END Entry buttons -->
+<!-- Reply collapseable -->
+@if (action == "Details" || action == "DetailsPartial")
+{
+    <div class="collapse mt-2" id="replyCollapse_@Model.Id">
+        <textarea class="form-control bg-dark text-white border-secondary textInput mb-2" rows="4" 
+                    placeholder="What are your thoughts?" required></textarea>
+        @if (signedIn && Model.HiddenBy.Contains(user))
+        {
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="reply(this, true)"
+                data-id="@Model.Id" data-url="@Url.Action("Reply", "Entries")">
+                Submit
+            </button>
+        }
+        else
+        {
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="reply(this, false)"
+                data-id="@Model.Id" data-url="@Url.Action("Reply", "Entries")">
+                Submit
+            </button>
+        }
+    </div>
+}
+<!-- END Reply collapsable -->
+<!-- Share collapsable -->
+@if (action == "DetailsPartial")
+{
+    <div class="collapse mt-2" id="shareCollapsePartial_@Model.Id">
+        <div class="card card-body bg-dark border border-secondary rounded d-inline-block">
+            <div class="input-group">
+                <button class="btn btn-outline-primary" type="button" onclick="copyLinkToClipboard(this)">
+                    Copy
+                </button>
+
+                @if (signedIn && Model.HiddenBy.Contains(user))
+                {
+                    <input type="text" class="shareLink form-control bg-dark text-white border-secondary"
+                           readonly value="@Url.ActionLink("Details", "Entries", new { id = Model.Id, showHidden = true })" />
+                }
+                else
+                {
+                    <input type="text" class="shareLink form-control bg-dark text-white border-secondary"
+                           readonly value="@Url.ActionLink("Details", "Entries", new { id = Model.Id, showHidden = false })" />
+                }
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="collapse mt-2" id="shareCollapse_@Model.Id">
+        <div class="card card-body bg-dark border border-secondary rounded d-inline-block">
+            <div class="input-group">
+                <button class="btn btn-outline-primary" type="button" onclick="copyLinkToClipboard(this)">
+                    Copy
+                </button>
+
+                @if (signedIn && Model.HiddenBy.Contains(user))
+                {
+                    <input type="text" class="shareLink form-control bg-dark text-white border-secondary"
+                           readonly value="@Url.ActionLink("Details", "Entries", new { id = Model.Id, showHidden = true })" />
+                }
+                else
+                {
+                    <input type="text" class="shareLink form-control bg-dark text-white border-secondary"
+                           readonly value="@Url.ActionLink("Details", "Entries", new { id = Model.Id, showHidden = false })" />
+                }
+            </div>
+        </div>
+    </div>
+}
+<!-- END Share collapsable -->
+<!-- Delete confirmation modal -->
+<div class="modal fade" tabindex="-1" id="delete_@Model.Id">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">
+                    Delete
+                    @if (Model is Post)
+                    {
+                        <span>post</span>
+                    }
+                    else if (Model is Comment)
+                    {
+                        <span>comment</span>
+                    }
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Are you sure you want to delete your
+                    @if (Model is Post)
+                    {
+                        <span>post?</span>
+                    }
+                    else if (Model is Comment)
+                    {
+                        <span>comment?</span>
+                    }
+                    <br />
+                    <br />
+                    <b>This action cannot be undone.</b>
+                </p>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                @if (action == "Details" && routeId == Model.Id)
+                {
+                    <button type="button" class="btn btn-danger"
+                            data-id="@Model.Id" data-url="@Url.Action("Delete", "Entries")"
+                            onclick="deleteAndRedirect(this)">
+                        <i class="fas fa-trash me-1"></i> Delete
+                    </button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-danger"
+                            data-id="@Model.Id" data-url="@Url.Action("Delete", "Entries")"
+                            onclick="deleteAndCollapse(this)">
+                        <i class="fas fa-trash me-1"></i> Delete
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END Delete confirmation modal -->

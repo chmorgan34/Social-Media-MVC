@@ -1,0 +1,31 @@
+﻿main {
+    margin-top: 65px;
+}
+#mainNav {
+    background-color: rgba(33, 37, 41, 0.9);
+}
+.btn:focus {
+    box-shadow: none;
+}
+
+
+.entry-selected {
+    border-color: white !important;
+}
+
+.clickable:hover {
+    background-color: #343a40
+}
+.clickable a {
+    text-decoration: none;
+    color: inherit;
+}
+.clickable a:visited h4 {
+    color: gray;
+}
+
+.details {
+    height: calc(100vh - 98px);
+    top: 65px;
+    overflow-y: scroll;
+}

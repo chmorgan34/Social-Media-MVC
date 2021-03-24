@@ -1,0 +1,197 @@
+﻿@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@model Entry
+@{ 
+    ApplicationUser user = null;
+    if (SignInManager.IsSignedIn(User))
+    {
+        user = await UserManager.GetUserAsync(User);
+    }
+}
+
+<!-- Voting -->
+<div class="voting_@Model.Id d-flex flex-column justify-content-center align-items-center me-1">
+    @if (Model is Post)
+    {
+        // Large buttons
+        if (SignInManager.IsSignedIn(User))
+        {
+            if (Model.UpvotedBy.Contains(user))
+            {
+                // Show unUpvote and downvote
+                <button type="button" class="d-none upvoteBtn btn btn-outline-success"
+                        data-id="@Model.Id" onclick="upvote(this)">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <button type="button" class="unUpvoteBtn btn btn-success"
+                        data-id="@Model.Id" onclick="unUpvote(this)">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <span class="voteScore">@Model.VoteScore</span>
+                <button type="button" class="downvoteBtn btn btn-outline-danger"
+                        data-id="@Model.Id" onclick="downvote(this)">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+                <button type="button" class="d-none unDownvoteBtn btn btn-danger"
+                        data-id="@Model.Id" onclick="unDownvote(this)">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+            }
+            else if (Model.DownvotedBy.Contains(user))
+            {
+                // Show unDownvote and upvote
+                <button type="button" class="upvoteBtn btn btn-outline-success"
+                        data-id="@Model.Id" onclick="upvote(this)">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <button type="button" class="d-none unUpvoteBtn btn btn-success"
+                        data-id="@Model.Id" onclick="unUpvote(this)">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <span class="voteScore">@Model.VoteScore</span>
+                <button type="button" class="d-none downvoteBtn btn btn-outline-danger"
+                        data-id="@Model.Id" onclick="downvote(this)">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+                <button type="button" class="unDownvoteBtn btn btn-danger"
+                        data-id="@Model.Id" onclick="unDownvote(this)">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+            }
+            else
+            {
+                // Show upvote and downvote
+                <button type="button" class="upvoteBtn btn btn-outline-success"
+                        data-id="@Model.Id" onclick="upvote(this)">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <button type="button" class="d-none unUpvoteBtn btn btn-success"
+                        data-id="@Model.Id" onclick="unUpvote(this)">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <span class="voteScore">@Model.VoteScore</span>
+                <button type="button" class="downvoteBtn btn btn-outline-danger"
+                        data-id="@Model.Id" onclick="downvote(this)">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+                <button type="button" class="d-none unDownvoteBtn btn btn-danger"
+                        data-id="@Model.Id" onclick="unDownvote(this)">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+            }
+        }
+        else
+        {
+            // Show upvote and downvote
+            <button type="button" class="upvoteBtn btn btn-outline-success"
+                    data-id="@Model.Id" onclick="upvote(this)">
+                <i class="fas fa-arrow-up"></i>
+            </button>
+            <button type="button" class="d-none unUpvoteBtn btn btn-success"
+                    data-id="@Model.Id" onclick="unUpvote(this)">
+                <i class="fas fa-arrow-up"></i>
+            </button>
+            <span class="voteScore">@Model.VoteScore</span>
+            <button type="button" class="downvoteBtn btn btn-outline-danger"
+                    data-id="@Model.Id" onclick="downvote(this)">
+                <i class="fas fa-arrow-down"></i>
+            </button>
+            <button type="button" class="d-none unDownvoteBtn btn btn-danger"
+                    data-id="@Model.Id" onclick="unDownvote(this)">
+                <i class="fas fa-arrow-down"></i>
+            </button>
+        }
+    }
+    else if (Model is Comment)
+    {
+        // Small buttons
+        if (SignInManager.IsSignedIn(User))
+        {
+            if (Model.UpvotedBy.Contains(user))
+            {
+                // Show unUpvote and downvote
+                <button type="button" class="d-none upvoteBtn btn btn-outline-success btn-sm"
+                        data-id="@Model.Id" onclick="upvote(this)">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <button type="button" class="unUpvoteBtn btn btn-success btn-sm"
+                        data-id="@Model.Id" onclick="unUpvote(this)">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <span class="voteScore">@Model.VoteScore</span>
+                <button type="button" class="downvoteBtn btn btn-outline-danger btn-sm"
+                        data-id="@Model.Id" onclick="downvote(this)">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+                <button type="button" class="d-none unDownvoteBtn btn btn-danger btn-sm"
+                        data-id="@Model.Id" onclick="unDownvote(this)">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+            }
+            else if (Model.DownvotedBy.Contains(user))
+            {
+                // Show unDownvote and upvote
+                <button type="button" class="upvoteBtn btn btn-outline-success btn-sm"
+                        data-id="@Model.Id" onclick="upvote(this)">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <button type="button" class="d-none unUpvoteBtn btn btn-success btn-sm"
+                        data-id="@Model.Id" onclick="unUpvote(this)">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <span class="voteScore">@Model.VoteScore</span>
+                <button type="button" class="d-none downvoteBtn btn btn-outline-danger btn-sm"
+                        data-id="@Model.Id" onclick="downvote(this)">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+                <button type="button" class="unDownvoteBtn btn btn-danger btn-sm"
+                        data-id="@Model.Id" onclick="unDownvote(this)">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+            }
+            else
+            {
+                // Show upvote and downvote
+                <button type="button" class="upvoteBtn btn btn-outline-success btn-sm"
+                        data-id="@Model.Id" onclick="upvote(this)">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <button type="button" class="d-none unUpvoteBtn btn btn-success btn-sm"
+                        data-id="@Model.Id" onclick="unUpvote(this)">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+                <span class="voteScore">@Model.VoteScore</span>
+                <button type="button" class="downvoteBtn btn btn-outline-danger btn-sm"
+                        data-id="@Model.Id" onclick="downvote(this)">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+                <button type="button" class="d-none unDownvoteBtn btn btn-danger btn-sm"
+                        data-id="@Model.Id" onclick="unDownvote(this)">
+                    <i class="fas fa-arrow-down"></i>
+                </button>
+            }
+        }
+        else
+        {
+            // Show upvote and downvote
+            <button type="button" class="upvoteBtn btn btn-outline-success btn-sm"
+                    data-id="@Model.Id" onclick="upvote(this)">
+                <i class="fas fa-arrow-up"></i>
+            </button>
+            <button type="button" class="d-none unUpvoteBtn btn btn-success btn-sm"
+                    data-id="@Model.Id" onclick="unUpvote(this)">
+                <i class="fas fa-arrow-up"></i>
+            </button>
+            <span class="voteScore">@Model.VoteScore</span>
+            <button type="button" class="downvoteBtn btn btn-outline-danger btn-sm"
+                    data-id="@Model.Id" onclick="downvote(this)">
+                <i class="fas fa-arrow-down"></i>
+            </button>
+            <button type="button" class="d-none unDownvoteBtn btn btn-danger btn-sm"
+                    data-id="@Model.Id" onclick="unDownvote(this)">
+                <i class="fas fa-arrow-down"></i>
+            </button>
+        }
+    }
+</div>
+<!-- END Voting -->

@@ -1,0 +1,172 @@
+﻿@model EntriesViewModel
+@{
+    var action = ViewContext.RouteData.Values["Action"].ToString();
+    switch (action)
+    {
+        case "Index":
+            ViewData["Title"] = Model.Sort.ToString();
+            break;
+
+        case "Authored":
+            ViewData["Title"] = "My stuff";
+            break;
+
+        default:
+            ViewData["Title"] = action;
+            break;
+    }
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Entry cards -->
+        <div class="col">
+            @foreach (var entry in Model.Entries)
+            {
+                <!-- Entry card -->
+                <div class="entry-card_@entry.Id p-2 mb-2 border border-secondary rounded">
+                    <div class="d-flex pb-2">
+                        <partial name="_VotingPartial" model="@entry" />
+                        <!-- Clickable -->
+                        <div class="clickable flex-grow-1 rounded-2 ps-2 ms-2">
+                            @if (entry is Post)
+                            {
+                                var post = entry as Post;
+                                if (Model.SignedIn && entry.HiddenBy.Contains(Model.CurrentUser))
+                                {
+                                    <a asp-controller="Entries" asp-action="Details" asp-route-id="@entry.Id" asp-route-showHidden="true"
+                                       data-id="@entry.Id" data-url="@Url.Action("DetailsPartial", "Entries")"
+                                       onclick="return showDetails(this, false, true)">
+                                        <div class="d-flex h-100">
+                                            <div class="d-flex flex-column justify-content-between flex-grow-1 pe-3">
+                                                <span></span>
+                                                <h4>@post.Title</h4>
+                                                <small style="color: gray">
+                                                    submitted <time class="timeago" datetime="@post.DateCreated.ToString("O")"></time>
+                                                    by <b>@post.Author.UserName</b>
+                                                </small>
+                                            </div>
+                                            <div class="d-flex align-items-center me-2">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </div>
+                                        </div>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Entries" asp-action="Details" asp-route-id="@entry.Id" asp-route-showHidden="false"
+                                       data-id="@entry.Id" data-url="@Url.Action("DetailsPartial", "Entries")"
+                                       onclick="return showDetails(this, false, false)">
+                                        <div class="d-flex h-100">
+                                            <div class="d-flex flex-column justify-content-between flex-grow-1 pe-3">
+                                                <span></span>
+                                                <h4>@post.Title</h4>
+                                                <small style="color: gray">
+                                                    submitted <time class="timeago" datetime="@post.DateCreated.ToString("O")"></time>
+                                                    by <b>@post.Author.UserName</b>
+                                                </small>
+                                            </div>
+                                            <div class="d-flex align-items-center me-2">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </div>
+                                        </div>
+                                    </a>
+                                }
+                            }
+                            else if (entry is Comment)
+                            {
+                                var comment = entry as Comment;
+                                if (Model.SignedIn && entry.HiddenBy.Contains(Model.CurrentUser))
+                                {
+                                    <a asp-controller="Entries" asp-action="Details" asp-route-id="@entry.Id" asp-route-showHidden="true"
+                                       data-id="@entry.Id" data-url="@Url.Action("DetailsPartial", "Entries")"
+                                       onclick="return showDetails(this, true, true)">
+                                        <div class="d-flex h-100">
+                                            <div class="d-flex flex-column justify-content-between flex-grow-1 pe-3">
+                                                <h5>@comment.Post.Title</h5>
+                                                <div class="flex-grow-1 border border-secondary rounded p-2">
+                                                    <p>@comment.Content</p>
+                                                    <small style="color: gray">
+                                                        submitted <time class="timeago" datetime="@comment.DateCreated.ToString("O")"></time>
+                                                        by <b>@comment.Author.UserName</b>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex align-items-center me-2">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </div>
+                                        </div>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a asp-controller="Entries" asp-action="Details" asp-route-id="@entry.Id" asp-route-showHidden="false"
+                                       data-id="@entry.Id" data-url="@Url.Action("DetailsPartial", "Entries")"
+                                       onclick="return showDetails(this, true, false)">
+                                        <div class="d-flex h-100">
+                                            <div class="d-flex flex-column justify-content-between flex-grow-1 pe-3">
+                                                <h5>@comment.Post.Title</h5>
+                                                <div class="flex-grow-1 border border-secondary rounded p-2">
+                                                    <p>@comment.Content</p>
+                                                    <small style="color: gray">
+                                                        submitted <time class="timeago" datetime="@comment.DateCreated.ToString("O")"></time>
+                                                        by <b>@comment.Author.UserName</b>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex align-items-center me-2">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </div>
+                                        </div>
+                                    </a>
+                                }
+                            }
+                        </div>
+                        <!-- END Clickable -->
+                    </div>
+                    <partial name="_EntryButtonsPartial" model="@entry" />
+                </div>
+                <!-- END Entry card -->
+            }
+        </div>
+        <!-- END Entry cards -->
+        <!-- Entry details -->
+        <div class="col details pt-1 invisible d-none d-md-block sticky-top border border-secondary rounded"
+             id="entryDetails">
+
+        </div>
+        <!-- END Entry details -->
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/navigation.js" asp-append-version="true"></script>
+    <script src="~/js/setup.js" asp-append-version="true"></script>
+    <script src="~/js/entryButtons.js" asp-append-version="true"></script>
+    <script src="~/js/voting.js" asp-append-version="true"></script>
+    <script src="~/js/entries.js" asp-append-version="true"></script>
+    <script>
+        if ('@action' == 'Index') {
+            switch ('@Model.Sort.ToString()') {
+                case 'Hot':
+                    navHot();
+                    break;
+                case 'New':
+                    navNew();
+                    break;
+                case 'Controversial':
+                    navControversial();
+                    break;
+                case 'Top':
+                    navTop();
+                    break;
+                default:
+                    navHot();
+                    break;
+            }
+        }
+        else if ('@action' == 'Search') {
+            $('#navSearch').val('@Model.SearchQuery');
+        }
+    </script>
+}

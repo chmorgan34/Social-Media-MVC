@@ -1,0 +1,27 @@
+﻿@model Comment
+
+
+<div class="entry-card_@Model.Id p-2 mb-1 border border-secondary rounded">
+    <div class="d-flex">
+        <partial name="_VotingPartial" model="Model" />
+        <div class="flex-grow-1 ms-2 d-flex flex-column">
+            <small class="border-bottom border-secondary pb-1">
+                <b>@Model.Author.UserName</b> -
+                <time class="timeago" datetime="@Model.DateCreated.ToString("O")"></time>
+            </small>
+            <p id="content_@Model.Id" class="flex-grow-1 pt-1">@Model.Content</p>
+            <partial name="_EditPartial" model="Model" />
+        </div>
+    </div>
+    <partial name="_EntryButtonsPartial" model="Model" />
+
+    @if (Model.Replies.Any())
+    {
+        foreach (var reply in Model.Replies)
+        {
+            <div class="mt-2 ms-2">
+                <partial name="_CommentPartial" model="reply" />
+            </div>
+        }
+    }
+</div>
